@@ -1,16 +1,27 @@
+import { AppProps } from "next/app";
+import { ThemeProvider } from "next-themes";
+import { useEffect, useState } from "react";
 import "../styles/globals.css";
-import type { AppProps } from "next/app";
-import Layout from "../components/Layout";
-import { AuthProvider } from "../utils/authContext";
-import "../styles/PulsingDot.css";
+import Header from "../components/Header";
 
 function MyApp({ Component, pageProps }: AppProps) {
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	if (!mounted) {
+		return null;
+	}
+
 	return (
-		<AuthProvider>
-			<Layout>
+		<ThemeProvider attribute='class'>
+			<div className='min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300'>
+				<Header />
 				<Component {...pageProps} />
-			</Layout>
-		</AuthProvider>
+			</div>
+		</ThemeProvider>
 	);
 }
 

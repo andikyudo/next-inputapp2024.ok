@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
+import { useEffect } from "react";
+import useSWR from "swr";
 import { supabase } from "../utils/supabase";
+import dynamic from "next/dynamic";
+
+const MapWithNoSSR = dynamic(() => import("../components/Map"), {
+	ssr: false,
+});
 
 interface Location {
 	id: string;
@@ -12,76 +15,36 @@ interface Location {
 	timestamp: string;
 }
 
-const PulsingDot: React.FC<{ lat: number; lng: number }> = ({ lat, lng }) => {
-	const pulsingDotIcon = L.divIcon({
-		className: "pulsing-dot-icon",
-		html: '<div class="pulsing-dot"></div>',
-		iconSize: [20, 20],
-	});
-
-	return <Marker position={[lat, lng]} icon={pulsingDotIcon} />;
+const fetcher = async () => {
+	const { data, error } = await supabase
+		.from("user_locations")
+		.select("*")
+		.order("timestamp", { ascending: false });
+	if (error) throw error;
+	return data;
 };
 
-const LocationsMapPage: React.FC = () => {
-	const [locations, setLocations] = useState<Location[]>([]);
-	const [loading, setLoading] = useState(true);
+export default function Locations() {
+	const { data: locations, error } = useSWR<Location[]>(
+		"user_locations",
+		fetcher
+	);
 
 	useEffect(() => {
-		fetchLocations();
-	}, []);
-
-	const fetchLocations = async () => {
-		try {
-			setLoading(true);
-			const { data, error } = await supabase
-				.from("user_locations")
-				.select("*")
-				.order("timestamp", { ascending: false });
-
-			if (error) {
-				throw error;
-			}
-
-			setLocations(data || []);
-		} catch (error) {
-			console.error("Error fetching locations:", error);
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	if (loading) {
-		return <div>Loading...</div>;
-	}
-
-	const center = locations[0]
-		? [locations[0].latitude, locations[0].longitude]
-		: [0, 0];
+		if (error) console.error("Error fetching locations:", error);
+	}, [error]);
 
 	return (
-		<div className='container mx-auto px-4'>
-			<h1 className='text-2xl font-bold mb-4'>User Locations Map</h1>
-			<div style={{ height: "500px", width: "100%" }}>
-				<MapContainer
-					center={center as L.LatLngExpression}
-					zoom={13}
-					style={{ height: "100%", width: "100%" }}
-				>
-					<TileLayer
-						url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-						attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-					/>
-					{locations.map((location) => (
-						<PulsingDot
-							key={location.id}
-							lat={location.latitude}
-							lng={location.longitude}
-						/>
-					))}
-				</MapContainer>
+		<div className='container mx-auto px-4 py-8'>
+			<h1 className='text-2xl font-bold mb-4 text-gray-800 dark:text-white'>
+				User Locations
+			</h1>
+			<div
+				className='bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden'
+				style={{ height: "600px" }}
+			>
+				{locations ? <MapWithNoSSR locations={locations} /> : <p>Loading...</p>}
 			</div>
 		</div>
 	);
-};
-
-export default LocationsMapPage;
+}

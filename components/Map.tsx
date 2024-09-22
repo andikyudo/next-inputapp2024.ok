@@ -5,9 +5,9 @@ import L from "leaflet";
 // Fix for default marker icons
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-	iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png").default,
-	iconUrl: require("leaflet/dist/images/marker-icon.png").default,
-	shadowUrl: require("leaflet/dist/images/marker-shadow.png").default,
+	iconRetinaUrl: "/leaflet/marker-icon-2x.png",
+	iconUrl: "/leaflet/marker-icon.png",
+	shadowUrl: "/leaflet/marker-shadow.png",
 });
 
 interface Location {
@@ -21,6 +21,11 @@ interface Location {
 interface MapComponentProps {
 	locations: Location[];
 }
+
+const PulsingDot = L.divIcon({
+	className: "pulsing-dot",
+	iconSize: [10, 10],
+});
 
 export default function MapComponent({ locations }: MapComponentProps) {
 	const center = locations[0]
@@ -41,9 +46,12 @@ export default function MapComponent({ locations }: MapComponentProps) {
 				<Marker
 					key={location.id}
 					position={[location.latitude, location.longitude]}
+					icon={PulsingDot}
 				>
 					<Popup>
-						User ID: {location.user_id}
+						Latitude: {location.latitude}
+						<br />
+						Longitude: {location.longitude}
 						<br />
 						Timestamp: {new Date(location.timestamp).toLocaleString()}
 					</Popup>
