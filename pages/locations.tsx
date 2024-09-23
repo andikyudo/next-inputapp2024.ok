@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import useSWR from "swr";
 import { supabase } from "../utils/supabase";
 import dynamic from "next/dynamic";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 const MapWithNoSSR = dynamic(() => import("../components/Map"), {
 	ssr: false,
@@ -35,16 +36,22 @@ export default function Locations() {
 	}, [error]);
 
 	return (
-		<div className='container mx-auto px-4 py-8'>
-			<h1 className='text-2xl font-bold mb-4 text-gray-800 dark:text-white'>
-				User Locations
-			</h1>
-			<div
-				className='bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden'
-				style={{ height: "600px" }}
-			>
-				{locations ? <MapWithNoSSR locations={locations} /> : <p>Loading...</p>}
+		<ProtectedRoute>
+			<div className='container mx-auto px-4 py-8'>
+				<h1 className='text-2xl font-bold mb-4 text-gray-800 dark:text-white'>
+					User Locations
+				</h1>
+				<div
+					className='bg-white dark:bg-gray-800 shadow-lg rounded-lg overflow-hidden'
+					style={{ height: "600px" }}
+				>
+					{locations ? (
+						<MapWithNoSSR locations={locations} />
+					) : (
+						<p>Loading...</p>
+					)}
+				</div>
 			</div>
-		</div>
+		</ProtectedRoute>
 	);
 }

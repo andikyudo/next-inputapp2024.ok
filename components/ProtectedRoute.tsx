@@ -2,17 +2,21 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../utils/authContext";
 
-export default function Home() {
-	const router = useRouter();
+const ProtectedRoute = ({ children }) => {
 	const { user } = useAuth();
+	const router = useRouter();
 
 	useEffect(() => {
-		if (user) {
-			router.push("/dashboard");
-		} else {
+		if (!user) {
 			router.push("/login");
 		}
 	}, [user, router]);
 
-	return null;
-}
+	if (!user) {
+		return null;
+	}
+
+	return children;
+};
+
+export default ProtectedRoute;
