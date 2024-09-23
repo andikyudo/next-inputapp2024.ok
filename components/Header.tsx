@@ -1,4 +1,3 @@
-// components/Header.tsx
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -7,7 +6,7 @@ import { useAuth } from "../utils/authContext";
 export default function Header() {
 	const [mounted, setMounted] = useState(false);
 	const { theme, setTheme } = useTheme();
-	const { user, logout } = useAuth();
+	const auth = useAuth();
 
 	useEffect(() => {
 		setMounted(true);
@@ -35,9 +34,9 @@ export default function Header() {
 						>
 							Locations
 						</Link>
-						{user && (
+						{auth?.user && (
 							<button
-								onClick={logout}
+								onClick={auth.logout}
 								className='text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white mx-4'
 							>
 								Logout

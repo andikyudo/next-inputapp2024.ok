@@ -1,6 +1,11 @@
 import Header from "./Header";
+import { ReactNode } from "react";
 
-export default function Layout({ children }) {
+interface LayoutProps {
+	children: ReactNode;
+}
+
+export default function Layout({ children }: LayoutProps) {
 	return (
 		<div className='min-h-screen bg-gray-100 dark:bg-gray-900'>
 			<Header />

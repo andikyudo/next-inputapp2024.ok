@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "../utils/authContext";
@@ -10,7 +11,7 @@ export default function Login() {
 	const router = useRouter();
 	const { login } = useAuth();
 
-	const handleSubmit = async (e) => {
+	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 		setError("");
 

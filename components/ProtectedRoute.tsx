@@ -1,8 +1,13 @@
+import React from "react";
+import { useAuth } from "../utils/authContext";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import { useAuth } from "../utils/authContext";
 
-const ProtectedRoute = ({ children }) => {
+interface ProtectedRouteProps {
+	children: React.ReactNode;
+}
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 	const { user } = useAuth();
 	const router = useRouter();
 
@@ -16,7 +21,7 @@ const ProtectedRoute = ({ children }) => {
 		return null;
 	}
 
-	return children;
+	return <>{children}</>;
 };
 
 export default ProtectedRoute;

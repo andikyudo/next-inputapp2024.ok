@@ -1,7 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "../utils/supabase";
 import ProtectedRoute from "../components/ProtectedRoute";
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from "recharts";
+import {
+	PieChart,
+	Pie,
+	Cell,
+	ResponsiveContainer,
+	Legend,
+	PieLabelRenderProps,
+} from "recharts";
 
 interface Session {
 	id: string;
@@ -20,15 +27,11 @@ export default function Dashboard() {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(0);
 
-	useEffect(() => {
-		fetchSessions();
-	}, [currentPage]);
-
-	const fetchSessions = async () => {
+	const fetchSessions = useCallback(async () => {
 		try {
 			const { count } = await supabase
 				.from("user_session")
-				.select("*", { count: "exact" });
+				.select("*", { count: "exact", head: true });
 
 			setTotalUsers(count || 500);
 			setTotalPages(Math.ceil((count || 500) / ITEMS_PER_PAGE));
@@ -58,7 +61,11 @@ export default function Dashboard() {
 		} catch (error) {
 			console.error("Error fetching sessions:", error);
 		}
-	};
+	}, [currentPage]);
+
+	useEffect(() => {
+		fetchSessions();
+	}, [fetchSessions]);
 
 	const activeUsers = sessions.filter((s) => s.is_active).length;
 	const loggedOutUsers = sessions.filter((s) => !s.is_active).length;
@@ -82,7 +89,16 @@ export default function Dashboard() {
 		innerRadius,
 		outerRadius,
 		percent,
-	}) => {
+	}: PieLabelRenderProps) => {
+		if (
+			typeof cx !== "number" ||
+			typeof cy !== "number" ||
+			typeof innerRadius !== "number" ||
+			typeof outerRadius !== "number" ||
+			typeof percent === "undefined"
+		) {
+			return null;
+		}
 		const RADIAN = Math.PI / 180;
 		const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
 		const x = cx + radius * Math.cos(-midAngle * RADIAN);
@@ -101,7 +117,7 @@ export default function Dashboard() {
 		);
 	};
 
-	const handlePageChange = (newPage: number) => {
+	const handlePageChange = (newPage: number): void => {
 		setCurrentPage(newPage);
 	};
 
